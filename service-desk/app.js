@@ -50,6 +50,31 @@ const historyTable = document.querySelector("#historyTable");
 const searchInput = document.querySelector("#searchInput");
 const clearData = document.querySelector("#clearData");
 const toast = document.querySelector("#toast");
+const themeToggle = document.querySelector("#themeToggle");
+
+const THEME_KEY = "serviceDeskTheme";
+
+function initTheme() {
+  const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  updateThemeButton(savedTheme);
+}
+
+function updateThemeButton(theme) {
+  themeToggle.textContent = theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode";
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+  const newTheme = currentTheme === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", newTheme);
+  localStorage.setItem(THEME_KEY, newTheme);
+  updateThemeButton(newTheme);
+}
+
+themeToggle.addEventListener("click", toggleTheme);
+
+initTheme();
 
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => {

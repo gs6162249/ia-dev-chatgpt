@@ -12,6 +12,15 @@
   --shadow: 0 16px 42px rgba(23, 32, 51, 0.10);
 }
 
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --panel: #2d2d2d;
+  --ink: #e0e0e0;
+  --muted: #999999;
+  --line: #404040;
+  --shadow: 0 16px 42px rgba(0, 0, 0, 0.40);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -36,12 +45,14 @@ button {
   border-radius: 8px;
   padding: 10px 14px;
   color: var(--ink);
-  background: #fff;
+  background: var(--panel);
   cursor: pointer;
+  transition: all 200ms ease;
 }
 
 button:hover {
-  border-color: #b8c3d5;
+  border-color: var(--muted);
+  background: var(--panel);
 }
 
 .primary {
@@ -62,7 +73,24 @@ button:hover {
   gap: 24px;
   padding: 24px clamp(16px, 4vw, 48px);
   border-bottom: 1px solid var(--line);
-  background: #fff;
+  background: var(--panel);
+}
+
+.theme-toggle {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.theme-toggle:hover {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
 }
 
 h1,
@@ -172,7 +200,16 @@ textarea {
   border-radius: 8px;
   padding: 11px 12px;
   color: var(--ink);
-  background: #fff;
+  background: var(--panel);
+  transition: all 200ms ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(36, 84, 214, 0.1);
 }
 
 textarea {
@@ -305,7 +342,8 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px;
-  background: #fbfcfe;
+  background: var(--panel);
+  opacity: 0.9;
 }
 
 .history-box ul {
