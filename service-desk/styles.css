@@ -322,7 +322,7 @@ textarea {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 760px;
+  min-width: 920px;
 }
 
 th,
@@ -337,6 +337,13 @@ th {
   color: #344054;
   background: #f8fafc;
   font-size: 13px;
+}
+
+.history-events {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 .toast {

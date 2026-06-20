@@ -30,12 +30,17 @@ Também é possível abrir diretamente o arquivo `index.html` com dois cliques.
 - `app.js`: regras de interação e persistência local.
 - `abrir-service-desk.bat`: atalho para abrir o app no navegador sem subir servidor.
 
-## Quatro bugs intencionais para a aula
+## Bugs corrigidos
 
-1. A busca do painel do analista procura por ID e título, mas não procura pelo nome do solicitante, apesar do placeholder dizer que isso funciona.
-2. Ao salvar alterações em um chamado, os dados aparecem atualizados na tela, mas não são persistidos no `localStorage`. Ao recarregar a página, as alterações somem.
-3. O botão "Limpar base local" não limpa a lista de chamados; ele restaura os chamados de exemplo. O rótulo e o comportamento entram em conflito.
-4. O histórico geral mostra apenas o estado atual de cada chamado, não a lista completa de eventos de cada chamado. Isso limita a auditoria prometida pela funcionalidade.
+1. A geração de ID não cria mais chamados com `#-Infinity` quando a base local está vazia ou possui IDs inválidos.
+2. A busca do painel do analista agora localiza chamados por ID, título, solicitante, e-mail e datas.
+3. As alterações de status, prioridade e correção agora são persistidas no `localStorage`.
+4. O botão "Limpar base local" limpa a lista de chamados e exibe uma mensagem compatível com a ação.
+5. O histórico geral exibe os eventos registrados em cada chamado, não apenas o estado atual.
+6. O formulário impede a criação de chamados com campos obrigatórios preenchidos apenas com espaços.
+7. O painel de detalhes acompanha o chamado visível na busca, evitando mostrar detalhes de um item fora do filtro.
+8. O histórico mostra uma mensagem amigável quando não há chamados registrados.
+9. Dados antigos ou inválidos no `localStorage` são normalizados ao carregar o aplicativo.
 
 ## Sugestão didática
 
