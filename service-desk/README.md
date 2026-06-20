@@ -41,6 +41,9 @@ Também é possível abrir diretamente o arquivo `index.html` com dois cliques.
 7. O painel de detalhes acompanha o chamado visível na busca, evitando mostrar detalhes de um item fora do filtro.
 8. O histórico mostra uma mensagem amigável quando não há chamados registrados.
 9. Dados antigos ou inválidos no `localStorage` são normalizados ao carregar o aplicativo.
+10. Erro ortográfico corrigido: "Correcao" → "Correção" nas mensagens de histórico de eventos.
+11. Layout da tabela de histórico melhorado: removida estrutura `<ul>` inválida dentro de `<td>` e substituída por `<div>` para melhor visualização.
+12. Exibição de eventos do histórico normalizada com renderização adequada em tabela HTML semântica.
 
 ## Sugestão didática
 
