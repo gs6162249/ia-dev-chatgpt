@@ -1,4 +1,5 @@
 const STORAGE_KEY = "serviceDeskTickets";
+const FIRST_TICKET_ID = 1001;
 
 const seedTickets = [
   {
@@ -107,7 +108,10 @@ function loadTickets() {
   }
 
   try {
-    return JSON.parse(stored);
+    const parsedTickets = JSON.parse(stored);
+    const normalizedTickets = normalizeTicketIds(parsedTickets);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedTickets));
+    return normalizedTickets;
   } catch {
     return [...seedTickets];
   }
@@ -118,7 +122,54 @@ function saveTickets() {
 }
 
 function nextId() {
-  return Math.max(...tickets.map((ticket) => ticket.id)) + 1;
+  const validIds = tickets
+    .map((ticket) => Number(ticket?.id))
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  if (validIds.length === 0) {
+    return FIRST_TICKET_ID;
+  }
+
+  return Math.max(...validIds) + 1;
+}
+
+function normalizeTicketIds(ticketList) {
+  if (!Array.isArray(ticketList)) {
+    return [...seedTickets];
+  }
+
+  let nextValidId = nextAvailableId(ticketList);
+  const usedIds = new Set();
+
+  return ticketList.map((ticket) => {
+    const safeTicket = ticket && typeof ticket === "object" ? ticket : {};
+    const numericId = Number(safeTicket.id);
+    const hasValidId = Number.isInteger(numericId) && numericId > 0 && !usedIds.has(numericId);
+    const id = hasValidId ? numericId : nextValidId;
+
+    usedIds.add(id);
+
+    while (usedIds.has(nextValidId)) {
+      nextValidId += 1;
+    }
+
+    return {
+      ...safeTicket,
+      id
+    };
+  });
+}
+
+function nextAvailableId(ticketList) {
+  const validIds = ticketList
+    .map((ticket) => Number(ticket?.id))
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  if (validIds.length === 0) {
+    return FIRST_TICKET_ID;
+  }
+
+  return Math.max(...validIds) + 1;
 }
 
 function render() {
