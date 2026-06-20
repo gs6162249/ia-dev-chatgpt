@@ -352,7 +352,7 @@ function updateSelectedTicket(ticketId) {
   const correctionChanged = ticket.correction !== newCorrection;
 
   if (!statusChanged && !priorityChanged && !correctionChanged) {
-    showToast("Nenhuma alteracao para salvar.");
+    showToast("Nenhuma alteração para salvar.");
     return;
   }
 
@@ -365,7 +365,7 @@ function updateSelectedTicket(ticketId) {
   }
 
   if (correctionChanged) {
-    eventList.push(newCorrection ? `Correcao registrada: ${newCorrection}` : "Correcao removida.");
+    eventList.push(newCorrection ? `Correção registrada: ${newCorrection}` : "Correção removida.");
   }
 
   ticket.status = newStatus;
@@ -398,9 +398,7 @@ function renderHistory() {
       <td><span class="badge ${priorityClass(ticket.priority)}">${ticket.priority}</span></td>
       <td>${formatDate(ticket.updatedAt)}</td>
       <td>
-        <ul class="history-events">
-          ${(Array.isArray(ticket.events) ? ticket.events : []).map((event) => `<li>${escapeHtml(event)}</li>`).join("")}
-        </ul>
+        ${(Array.isArray(ticket.events) ? ticket.events : []).map((event) => `<div>${escapeHtml(event)}</div>`).join("")}
       </td>
     </tr>
   `).join("");
