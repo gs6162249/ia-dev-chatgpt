@@ -92,8 +92,8 @@ searchInput.addEventListener("input", renderTicketList);
 
 clearData.addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
-  tickets = [...seedTickets];
-  selectedTicketId = tickets[0].id;
+  tickets = [];
+  selectedTicketId = null;
   saveTickets();
   showToast("Base local restaurada.");
   render();
