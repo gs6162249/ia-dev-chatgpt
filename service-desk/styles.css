@@ -13,12 +13,12 @@
 }
 
 [data-theme="dark"] {
-  --bg: #1a1a1a;
-  --panel: #2d2d2d;
-  --ink: #e0e0e0;
-  --muted: #999999;
-  --line: #404040;
-  --shadow: 0 16px 42px rgba(0, 0, 0, 0.40);
+  --bg: #0f0f0f;
+  --panel: #1a1a1a;
+  --ink: #f0f0f0;
+  --muted: #b0b0b0;
+  --line: #2a2a2a;
+  --shadow: 0 16px 42px rgba(0, 0, 0, 0.60);
 }
 
 * {
@@ -85,6 +85,11 @@ button:hover {
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
+  transition: all 200ms ease;
+}
+
+[data-theme="dark"] .theme-toggle {
+  border-color: #3a3a3a;
 }
 
 .theme-toggle:hover {
@@ -121,6 +126,10 @@ h3 {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+[data-theme="dark"] .eyebrow {
+  color: #60a5fa;
 }
 
 .tabs {
@@ -187,7 +196,7 @@ main {
 label {
   display: grid;
   gap: 7px;
-  color: #344054;
+  color: var(--ink);
   font-size: 14px;
   font-weight: 700;
 }
@@ -289,9 +298,19 @@ textarea {
   font-weight: 700;
 }
 
+[data-theme="dark"] .badge {
+  color: #f0f0f0;
+  background: #2a2a2a;
+}
+
 .badge.status-resolvido {
   color: var(--success);
   background: #e8f7ef;
+}
+
+[data-theme="dark"] .badge.status-resolvido {
+  color: #4ade80;
+  background: #1e3a1f;
 }
 
 .badge.status-em-atendimento {
@@ -299,10 +318,21 @@ textarea {
   background: #fff4df;
 }
 
+[data-theme="dark"] .badge.status-em-atendimento {
+  color: #fbbf24;
+  background: #3a2f1a;
+}
+
 .badge.priority-crítica,
 .badge.priority-alta {
   color: var(--danger);
   background: #ffeded;
+}
+
+[data-theme="dark"] .badge.priority-crítica,
+[data-theme="dark"] .badge.priority-alta {
+  color: #ff6b6b;
+  background: #3a1f1f;
 }
 
 .details-panel {
@@ -372,9 +402,15 @@ td {
 }
 
 th {
-  color: #344054;
-  background: #f8fafc;
+  color: var(--ink);
+  background: var(--panel);
   font-size: 13px;
+  font-weight: 700;
+}
+
+[data-theme="dark"] th {
+  color: #f0f0f0;
+  background: #242424;
 }
 
 .history-events {
