@@ -64,20 +64,38 @@ tabs.forEach((tab) => {
 ticketForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  const requesterInput = document.querySelector("#requester");
+  const emailInput = document.querySelector("#email");
+  const titleInput = document.querySelector("#title");
+  const descriptionInput = document.querySelector("#description");
+  const requester = requesterInput.value.trim();
+  const email = emailInput.value.trim();
+  const title = titleInput.value.trim();
+  const description = descriptionInput.value.trim();
+
+  if (!requester || !email || !title || !description) {
+    const firstEmptyField = [requesterInput, emailInput, titleInput, descriptionInput]
+      .find((field) => !field.value.trim());
+
+    showToast("Preencha os campos obrigatorios sem usar apenas espacos.");
+    firstEmptyField?.focus();
+    return;
+  }
+
   const formTicket = {
     id: nextId(),
-    requester: document.querySelector("#requester").value.trim(),
-    email: document.querySelector("#email").value.trim(),
+    requester,
+    email,
     category: document.querySelector("#category").value,
     priority: document.querySelector("#priority").value,
     status: "Aberto",
-    title: document.querySelector("#title").value.trim(),
-    description: document.querySelector("#description").value.trim(),
+    title,
+    description,
     correction: "",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     events: [
-      `Chamado aberto por ${document.querySelector("#requester").value.trim()}.`
+      `Chamado aberto por ${requester}.`
     ]
   };
 
@@ -89,14 +107,17 @@ ticketForm.addEventListener("submit", (event) => {
   render();
 });
 
-searchInput.addEventListener("input", renderTicketList);
+searchInput.addEventListener("input", () => {
+  renderTicketList();
+  renderTicketDetails();
+});
 
 clearData.addEventListener("click", () => {
   localStorage.removeItem(STORAGE_KEY);
   tickets = [];
   selectedTicketId = null;
   saveTickets();
-  showToast("Base local restaurada.");
+  showToast("Base local limpa.");
   render();
 });
 
@@ -113,6 +134,7 @@ function loadTickets() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedTickets));
     return normalizedTickets;
   } catch {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seedTickets));
     return [...seedTickets];
   }
 }
@@ -146,6 +168,9 @@ function normalizeTicketIds(ticketList) {
     const numericId = Number(safeTicket.id);
     const hasValidId = Number.isInteger(numericId) && numericId > 0 && !usedIds.has(numericId);
     const id = hasValidId ? numericId : nextValidId;
+    const now = new Date().toISOString();
+    const createdAt = isValidDate(safeTicket.createdAt) ? safeTicket.createdAt : now;
+    const updatedAt = isValidDate(safeTicket.updatedAt) ? safeTicket.updatedAt : createdAt;
 
     usedIds.add(id);
 
@@ -155,7 +180,18 @@ function normalizeTicketIds(ticketList) {
 
     return {
       ...safeTicket,
-      id
+      id,
+      requester: String(safeTicket.requester ?? "").trim() || "Solicitante nao informado",
+      email: String(safeTicket.email ?? "").trim(),
+      category: String(safeTicket.category ?? "").trim() || "Outro",
+      priority: String(safeTicket.priority ?? "").trim() || "Baixa",
+      status: String(safeTicket.status ?? "").trim() || "Aberto",
+      title: String(safeTicket.title ?? "").trim() || "Chamado sem titulo",
+      description: String(safeTicket.description ?? "").trim() || "Descricao nao informada",
+      correction: String(safeTicket.correction ?? "").trim(),
+      createdAt,
+      updatedAt,
+      events: Array.isArray(safeTicket.events) ? safeTicket.events : []
     };
   });
 }
@@ -172,6 +208,10 @@ function nextAvailableId(ticketList) {
   return Math.max(...validIds) + 1;
 }
 
+function isValidDate(value) {
+  return !Number.isNaN(new Date(value).getTime());
+}
+
 function render() {
   renderTicketList();
   renderTicketDetails();
@@ -181,11 +221,23 @@ function render() {
 function renderTicketList() {
   const term = searchInput.value.trim().toLowerCase();
   const filteredTickets = tickets.filter((ticket) => {
-    return (
-      String(ticket.id).includes(term) ||
-      ticket.title.toLowerCase().includes(term)
-    );
+    const searchableContent = [
+      ticket.id,
+      ticket.title,
+      ticket.requester,
+      ticket.email,
+      ticket.createdAt,
+      ticket.updatedAt,
+      formatSearchDate(ticket.createdAt),
+      formatSearchDate(ticket.updatedAt)
+    ].join(" ").toLowerCase();
+
+    return searchableContent.includes(term);
   });
+
+  if (!filteredTickets.some((ticket) => ticket.id === selectedTicketId)) {
+    selectedTicketId = filteredTickets[0]?.id ?? null;
+  }
 
   ticketCounter.textContent = `${filteredTickets.length} chamado${filteredTickets.length === 1 ? "" : "s"}`;
 
@@ -226,6 +278,8 @@ function renderTicketDetails() {
     `;
     return;
   }
+
+  const ticketEvents = Array.isArray(ticket.events) ? ticket.events : [];
 
   ticketDetails.innerHTML = `
     <div class="details-header">
@@ -276,7 +330,7 @@ function renderTicketDetails() {
     <div class="history-box">
       <strong>Histórico deste chamado</strong>
       <ul>
-        ${ticket.events.map((event) => `<li class="history-line">${escapeHtml(event)}</li>`).join("")}
+        ${ticketEvents.map((event) => `<li class="history-line">${escapeHtml(event)}</li>`).join("")}
       </ul>
     </div>
   `;
@@ -293,29 +347,48 @@ function updateSelectedTicket(ticketId) {
   const newCorrection = document.querySelector("#detailCorrection").value.trim();
   const eventList = [];
 
-  if (ticket.status !== newStatus) {
+  const statusChanged = ticket.status !== newStatus;
+  const priorityChanged = ticket.priority !== newPriority;
+  const correctionChanged = ticket.correction !== newCorrection;
+
+  if (!statusChanged && !priorityChanged && !correctionChanged) {
+    showToast("Nenhuma alteracao para salvar.");
+    return;
+  }
+
+  if (statusChanged) {
     eventList.push(`Status alterado de ${ticket.status} para ${newStatus}.`);
   }
 
-  if (ticket.priority !== newPriority) {
+  if (priorityChanged) {
     eventList.push(`Prioridade alterada de ${ticket.priority} para ${newPriority}.`);
   }
 
-  if (ticket.correction !== newCorrection && newCorrection) {
-    eventList.push(`Correção registrada: ${newCorrection}`);
+  if (correctionChanged) {
+    eventList.push(newCorrection ? `Correcao registrada: ${newCorrection}` : "Correcao removida.");
   }
 
   ticket.status = newStatus;
   ticket.priority = newPriority;
   ticket.correction = newCorrection;
   ticket.updatedAt = new Date().toISOString();
-  ticket.events = ticket.events.concat(eventList);
+  ticket.events = (Array.isArray(ticket.events) ? ticket.events : []).concat(eventList);
 
+  saveTickets();
   showToast(`Chamado #${ticket.id} atualizado.`);
   render();
 }
 
 function renderHistory() {
+  if (tickets.length === 0) {
+    historyTable.innerHTML = `
+      <tr>
+        <td colspan="7">Nenhum chamado registrado.</td>
+      </tr>
+    `;
+    return;
+  }
+
   historyTable.innerHTML = tickets.map((ticket) => `
     <tr>
       <td>#${ticket.id}</td>
@@ -324,23 +397,47 @@ function renderHistory() {
       <td><span class="badge ${statusClass(ticket.status)}">${ticket.status}</span></td>
       <td><span class="badge ${priorityClass(ticket.priority)}">${ticket.priority}</span></td>
       <td>${formatDate(ticket.updatedAt)}</td>
+      <td>
+        <ul class="history-events">
+          ${(Array.isArray(ticket.events) ? ticket.events : []).map((event) => `<li>${escapeHtml(event)}</li>`).join("")}
+        </ul>
+      </td>
     </tr>
   `).join("");
 }
 
 function statusClass(status) {
-  return `status-${status.toLowerCase().replaceAll(" ", "-")}`;
+  return `status-${String(status ?? "").toLowerCase().replaceAll(" ", "-")}`;
 }
 
 function priorityClass(priority) {
-  return `priority-${priority.toLowerCase()}`;
+  return `priority-${String(priority ?? "").toLowerCase()}`;
 }
 
 function formatDate(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Data nao informada";
+  }
+
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short"
-  }).format(new Date(value));
+  }).format(date);
+}
+
+function formatSearchDate(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short"
+  }).format(date);
 }
 
 function escapeHtml(value) {
